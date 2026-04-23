@@ -62,25 +62,12 @@
          (map (fn [{:keys [loc range] :as edit}]
                 (if (z/find-value loc z/next 'ns)
                   ;; re-read zloc to get a unchanged zloc with :forms
-                  (let [reread-loc (some-> loc
-                                           z/root-string
-                                           parser/z-of-string*)
-                        ;; When the user hasn't picked an indentation style but
-                        ;; the ns is already using `:same-line`, force `:keep`
-                        ;; so the cleanup doesn't reflow every libspec just to
-                        ;; add one entry.
-                        db (cond-> db
-                             (and (not (settings/get db [:clean :ns-inner-blocks-indentation]))
-                                  (not (settings/get db [:keep-require-at-start?]))
-                                  (some-> reread-loc
-                                          edit/find-namespace
-                                          same-line-ns-block?))
-                             (assoc-in [:settings :clean :ns-inner-blocks-indentation]
-                                       :keep))]
-                    (some-> reread-loc
-                            (f.clean-ns/clean-ns-edits uri db)
-                            first
-                            (assoc :range range)))
+                  (some-> loc
+                          z/root-string
+                          parser/z-of-string*
+                          (f.clean-ns/clean-ns-edits uri db)
+                          first
+                          (assoc :range range))
                   edit)))
          seq)
     edits))
