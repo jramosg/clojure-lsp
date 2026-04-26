@@ -44,18 +44,6 @@
         :same-line
         :keep)))
 
-(defn- same-line-ns-block?
-  "True when the first child of :require/:import sits on the same row as the
-  keyword. Used to detect `:same-line` user formatting so the auto-clean can
-  preserve it instead of re-flowing the whole block."
-  [ns-zloc]
-  (some (fn [kw]
-          (when-let [kw-loc (z/find-value (zsub/subzip ns-zloc) z/next kw)]
-            (when-let [right (z/right kw-loc)]
-              (= (-> kw-loc z/node meta :row)
-                 (-> right z/node meta :row)))))
-        [:require :import]))
-
 (defn cleaning-ns-edits [uri db edits]
   (if (settings/get db [:clean :automatically-after-ns-refactor] true)
     (->> edits
